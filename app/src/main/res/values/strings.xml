@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">XAMU WIL</string>
+
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="loginbtn">Sign in</string>
+    <string name="signup">Sign up</string>
+
+    <string name="clientsTitle">Select Client</string>
+    <string name="projectsTitle">Select Project</string>
+    <string name="btnAddProject">Add Project</string>
+
+    <string name="addProjectTitle">Add Project</string>
+    <string name="companyNameTitle">Company</string>
+    <string name="userEmailTitle">User</string>
+    <string name="projectNameHint">Project name</string>
+    <string name="confirmAddProject">Create project</string>
+
+    <string name="title_enter_project_data">Enter Project Data</string>
+    <string name="confirm">Save local</string>
+    <string name="fbtn_edit_data">Edit data</string>
+
+    <string name="Save">Save</string>
+    <string name="btnCancelSignup">Cancel</string>
+    <!-- Shortened dashboard intro to fit on one line at the top -->
+    <string name="dashboard_intro">Xamu Wetlands Dashboard</string>
+
+    <!-- Strings for Add Weather & Soil screen -->
+    <string name="add_weather_soil_title">Add Weather &amp; Soil Data</string>
+    <string name="select_client">Select client</string>
+    <string name="choose_client_prompt">Choose client</string>
+    <string name="temperature_label">Temperature (°C)</string>
+    <string name="temperature_hint">e.g. 23.5</string>
+    <string name="humidity_label">Humidity (%)</string>
+    <string name="humidity_hint">e.g. 68.2</string>
+    <string name="pressure_label">Pressure (hPa)</string>
+    <string name="pressure_hint">e.g. 1013.2</string>
+    <string name="soil_moisture_label">Soil moisture (%)</string>
+    <string name="soil_moisture_hint">e.g. 12.5</string>
+    <string name="soil_ph_label">Soil pH</string>
+    <string name="soil_ph_hint">e.g. 6.8</string>
+    <string name="notes_label">Notes (optional)</string>
+    <string name="notes_hint">any observations...</string>
+</resources>

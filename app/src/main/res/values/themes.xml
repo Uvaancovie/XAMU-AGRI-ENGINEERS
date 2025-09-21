@@ -1,0 +1,4 @@
+<resources>
+    <!-- themes.xml previously duplicated Theme.WIL; keep it empty to avoid duplicate resources.
+         Theme details are defined in styles.xml (green theme). -->
+</resources>

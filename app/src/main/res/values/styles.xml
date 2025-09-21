@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App theme -->
+    <style name="Theme.WIL" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primaryGreen</item>
+        <item name="colorPrimaryVariant">@color/primaryGreenDark</item>
+        <item name="colorOnPrimary">@color/onPrimary</item>
+        <item name="android:statusBarColor">@color/primaryGreenDark</item>
+        <item name="android:windowBackground">@color/background</item>
+    </style>
+
+    <!-- Green button style -->
+    <style name="Widget.WIL.GreenButton" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">8dp</item>
+        <item name="backgroundTint">@color/primaryGreen</item>
+        <item name="android:textColor">@color/onPrimary</item>
+    </style>
+
+</resources>

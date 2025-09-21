@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.WIL">
+
+        <activity android:name=".ui.SearchInternetActivity"/>
+        <activity android:name=".ui.DashboardActivity"/>
+        <activity android:name=".ui.AddClientActivity"/>
+        <activity android:name=".ui.SettingsActivity"/>
+        <activity android:name=".ui.ProjectDetailsActivity"/>
+        <activity android:name=".ui.AddDataToProjectActivity"/>
+        <activity android:name=".ui.AddProjectActivity"/>
+        <activity android:name=".ui.SelectProjectActivity"/>
+        <activity android:name=".ui.SelectClientActivity"/>
+        <activity android:name=".ui.RegisterActivity"/>
+        <activity android:name=".ui.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.AddWeatherSoilActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.xamu_wil_project.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+</manifest>

@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundLight">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primaryGreen"
+        android:titleTextColor="@color/onPrimary"
+        app:title="Xamu Wetlands" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="56dp"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvDashboardIntro"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/dashboard_intro"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:textColor="@color/textPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardQuickActions"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvDashboardIntro">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvQuickActions"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Quick Actions"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClients"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_clients"
+                        app:iconGravity="start"
+                        android:text="Clients"
+                        app:layout_constraintEnd_toStartOf="@id/btnProjects"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvQuickActions" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProjects"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_projects"
+                        app:iconGravity="start"
+                        android:text="Projects"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/btnClients"
+                        app:layout_constraintTop_toBottomOf="@id/tvQuickActions" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddProject"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_add_project"
+                        app:iconGravity="start"
+                        android:text="Add Project"
+                        app:layout_constraintEnd_toStartOf="@id/btnAddData"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btnClients" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddData"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_add_data"
+                        app:iconGravity="start"
+                        android:text="Add Data"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/btnAddProject"
+                        app:layout_constraintTop_toBottomOf="@id/btnProjects" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddWeatherSoil"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_weather"
+                        app:iconGravity="start"
+                        android:text="Add Weather/Soil"
+                        app:layout_constraintEnd_toStartOf="@id/btnSettings"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btnAddData" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSettings"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_settings"
+                        app:iconGravity="start"
+                        android:text="Settings"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btnAddProject" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProjectDetails"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_projects"
+                        app:iconGravity="start"
+                        android:text="Project Details"
+                        app:layout_constraintEnd_toStartOf="@id/btnSearch"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btnAddData" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLogout"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_settings"
+                        app:iconGravity="start"
+                        android:text="Sign Out"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btnProjectDetails" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnResetDemo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_add_data"
+                        app:iconGravity="start"
+                        android:text="Reset Demo Data"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btnLogout" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSearch"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:icon="@drawable/ic_search"
+                        app:iconGravity="start"
+                        android:text="Search"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btnSettings" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- New quick weather & soil entry card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWeatherQuick"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cardQuickActions">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tvWeatherQuickTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_weather_soil_title"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:paddingBottom="8dp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerDashboardClients"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:prompt="@string/choose_client_prompt" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2"
+                        android:layout_marginTop="8dp">
+
+                        <EditText
+                            android:id="@+id/etDashboardTemp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/temperature_hint"
+                            android:inputType="numberDecimal" />
+
+                        <EditText
+                            android:id="@+id/etDashboardHumidity"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:hint="@string/humidity_hint"
+                            android:inputType="numberDecimal" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2"
+                        android:layout_marginTop="8dp">
+
+                        <EditText
+                            android:id="@+id/etDashboardSoilMoisture"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/soil_moisture_hint"
+                            android:inputType="numberDecimal" />
+
+                        <EditText
+                            android:id="@+id/etDashboardSoilPH"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:hint="@string/soil_ph_hint"
+                            android:inputType="numberDecimal" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSaveDashboardWeather"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/Save" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        app:itemIconTint="@color/onPrimary"
+        app:itemTextColor="@color/onPrimary"
+        app:menu="@menu/bottom_nav_menu"
+        android:background="@color/primaryGreen" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

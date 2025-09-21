@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@color/backgroundLight">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_weather_soil_title"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/select_client" />
+
+        <Spinner
+            android:id="@+id/spinnerClients"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:prompt="@string/choose_client_prompt" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/temperature_label" />
+        <EditText
+            android:id="@+id/etTemperature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/temperature_hint"
+            android:autofillHints="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/humidity_label" />
+        <EditText
+            android:id="@+id/etHumidity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/humidity_hint"
+            android:autofillHints="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pressure_label" />
+        <EditText
+            android:id="@+id/etPressure"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/pressure_hint"
+            android:autofillHints="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/soil_moisture_label" />
+        <EditText
+            android:id="@+id/etSoilMoisture"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/soil_moisture_hint"
+            android:autofillHints="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/soil_ph_label" />
+        <EditText
+            android:id="@+id/etSoilPH"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/soil_ph_hint"
+            android:autofillHints="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/notes_label" />
+        <EditText
+            android:id="@+id/etNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:hint="@string/notes_hint"
+            android:autofillHints="" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveWeatherSoil"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/Save" />
+
+    </LinearLayout>
+
+</ScrollView>

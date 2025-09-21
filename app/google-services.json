@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "722862111675",
+    "project_id": "xamu-wil",
+    "storage_bucket": "xamu-wil.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722862111675:android:f0e0782cf04b40396b629e",
+        "android_client_info": {
+          "package_name": "com.example.xamu_wil_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuLswvMiYjm6b9-IlRfOxBdtk0c_hv4KA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
