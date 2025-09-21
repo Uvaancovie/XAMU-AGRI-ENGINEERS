@@ -189,6 +189,14 @@ class AddProjectActivity : AppCompatActivity() {
                 // clear the project name so the user can add more and see the new entry in the list
                 etProjectName.text.clear()
                 // Flow collector will refresh the list from Room; optimistic update above avoids perceived delay
+
+                // If this activity was started for a result (e.g., from SelectProjectActivity), notify caller so it can refresh
+                val startedForResult = callingActivity != null || intent.getBooleanExtra("forResult", false)
+                if (startedForResult) {
+                    setResult(Activity.RESULT_OK)
+                    // finish so the caller receives onActivityResult and reloads list
+                    finish()
+                }
             } catch (ex: Exception) {
                 try { DataSeeder.addLocalProject(this@AddProjectActivity, projectObj) } catch (_: Exception) {}
                 Toast.makeText(this@AddProjectActivity, "Could not add to server; saved locally", Toast.LENGTH_LONG).show()

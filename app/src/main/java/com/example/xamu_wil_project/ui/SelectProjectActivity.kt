@@ -9,11 +9,17 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
 import com.example.xamu_wil_project.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.example.xamu_wil_project.data.DataSeeder
 import com.example.xamu_wil_project.data.Project
+import com.example.xamu_wil_project.data.local.toModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultLauncher
 
 class SelectProjectActivity : AppCompatActivity() {
 
@@ -24,6 +30,7 @@ class SelectProjectActivity : AppCompatActivity() {
     private val visible = mutableListOf<Project>()
     private lateinit var adapter: ArrayAdapter<String>
     private val REQ_ADD_PROJECT = 2001
+    private lateinit var addProjectLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +49,35 @@ class SelectProjectActivity : AppCompatActivity() {
         // Capture incoming company name (if this activity was opened after selecting a client)
         val incomingCompany = intent.getStringExtra("companyName") ?: ""
 
-        loadProjects()
+        // Prefer local Room DB for project listing (live updates). Fallback to Firebase single-read if DB empty.
+        val localDb = com.example.xamu_wil_project.data.local.AppDatabase.getInstance(this)
+        val projectDao = localDb.projectDao()
+
+        // Observe Room first
+        lifecycleScope.launch {
+            if (incomingCompany.isNotBlank()) {
+                projectDao.getByCompanyFlow(incomingCompany).collectLatest { entities ->
+                    if (entities.isNotEmpty()) {
+                        allProjects.clear()
+                        allProjects.addAll(entities.map { it.toModel() })
+                        filter("")
+                    } else {
+                        // fallback to firebase single-read
+                        loadProjectsFromFirebase(incomingCompany)
+                    }
+                }
+            } else {
+                projectDao.getAllFlow().collectLatest { entities ->
+                    if (entities.isNotEmpty()) {
+                        allProjects.clear()
+                        allProjects.addAll(entities.map { it.toModel() })
+                        filter("")
+                    } else {
+                        loadProjectsFromFirebase("")
+                    }
+                }
+            }
+        }
 
         search.addTextChangedListener(
             onTextChanged = { text, _, _, _ -> filter(text?.toString().orEmpty()) }
@@ -56,16 +91,26 @@ class SelectProjectActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // Register Activity Result launcher for AddProjectActivity
+        addProjectLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                // Newly added project; Room Flow will emit updates. If list is currently empty, do a firebase fallback load
+                if (allProjects.isEmpty()) loadProjectsFromFirebase("")
+            }
+        }
+
         btnAdd.setOnClickListener {
             // If this screen was opened for a specific company, forward it to AddProjectActivity
             val companyToPass = if (incomingCompany.isNotBlank()) incomingCompany else ""
-            startActivityForResult(Intent(this, AddProjectActivity::class.java).putExtra("companyName", companyToPass), REQ_ADD_PROJECT)
+            val intent = Intent(this, AddProjectActivity::class.java)
+                .putExtra("companyName", companyToPass)
+                .putExtra("forResult", true)
+            addProjectLauncher.launch(intent)
         }
     }
 
-    private fun loadProjects() {
+    private fun loadProjectsFromFirebase(incomingCompany: String) {
         val myEmail = auth.currentUser?.email
-        // Use single-value read and fallback to demo projects when empty or on error.
         db.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 allProjects.clear()
@@ -74,7 +119,10 @@ class SelectProjectActivity : AppCompatActivity() {
                         val p = child.getValue(Project::class.java)
                         // If user is signed in, filter by their email; otherwise include all
                         if (p != null && (myEmail == null || myEmail.isBlank() || p.appUserUsername == myEmail)) {
-                            allProjects.add(p)
+                            // if incomingCompany is provided, filter by it
+                            if (incomingCompany.isBlank() || p.companyName == incomingCompany) {
+                                allProjects.add(p)
+                            }
                         }
                     }
                     if (allProjects.isNotEmpty()) {
@@ -113,14 +161,12 @@ class SelectProjectActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadProjects()
+        // keep firebase fallback to ensure latest remote entries are visible when needed
+        // loadProjects() // removed in favor of Room + firebase fallback
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        // retained for compatibility but Activity Result API handles the callback now
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_ADD_PROJECT && resultCode == RESULT_OK) {
-            // Newly added project; reload list
-            loadProjects()
-        }
     }
 }

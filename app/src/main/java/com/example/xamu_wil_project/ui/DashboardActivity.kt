@@ -39,14 +39,13 @@ class DashboardActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Dashboard quick-entry views
-        // Find new quick-entry views dynamically to avoid layout-scope lint issues
-        val spinnerClients = resources.getIdentifier("spinnerDashboardClients", "id", packageName).let { id -> if (id != 0) findViewById<Spinner>(id) else null }
-        val etTemp = resources.getIdentifier("etDashboardTemp", "id", packageName).let { id -> if (id != 0) findViewById<EditText>(id) else null }
-        val etHum = resources.getIdentifier("etDashboardHumidity", "id", packageName).let { id -> if (id != 0) findViewById<EditText>(id) else null }
-        val etSoilMoist = resources.getIdentifier("etDashboardSoilMoisture", "id", packageName).let { id -> if (id != 0) findViewById<EditText>(id) else null }
-        val etSoilPH = resources.getIdentifier("etDashboardSoilPH", "id", packageName).let { id -> if (id != 0) findViewById<EditText>(id) else null }
-        val btnSaveQuick = resources.getIdentifier("btnSaveDashboardWeather", "id", packageName).let { id -> if (id != 0) findViewById<Button>(id) else null }
+        // Dashboard quick-entry views (direct lookup is preferred)
+        val spinnerClients = findViewById<Spinner?>(R.id.spinnerDashboardClients)
+        val etTemp = findViewById<EditText?>(R.id.etDashboardTemp)
+        val etHum = findViewById<EditText?>(R.id.etDashboardHumidity)
+        val etSoilMoist = findViewById<EditText?>(R.id.etDashboardSoilMoisture)
+        val etSoilPH = findViewById<EditText?>(R.id.etDashboardSoilPH)
+        val btnSaveQuick = findViewById<Button?>(R.id.btnSaveDashboardWeather)
 
         // Prepare a simple spinner adapter (only if spinner exists)
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mutableListOf<String>())
