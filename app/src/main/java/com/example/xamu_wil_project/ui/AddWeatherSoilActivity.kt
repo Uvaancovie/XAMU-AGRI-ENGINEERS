@@ -7,10 +7,12 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.xamu_wil_project.R
 import com.example.xamu_wil_project.data.local.AppDatabase
 import com.example.xamu_wil_project.data.local.WeatherSoilEntity
+import com.example.xamu_wil_project.ui.viewmodel.WeatherSoilViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -47,7 +49,8 @@ class AddWeatherSoilActivity : AppCompatActivity() {
 
         val db = AppDatabase.getInstance(this)
         val clientDao = db.clientDao()
-        val weatherDao = db.weatherSoilDao()
+        // use ViewModel for DB writes
+        val vm = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application)).get(WeatherSoilViewModel::class.java)
 
         // Observe clients and populate spinner
         lifecycleScope.launch {
@@ -63,11 +66,11 @@ class AddWeatherSoilActivity : AppCompatActivity() {
         }
 
         btnSave.setOnClickListener {
-            saveEntry(weatherDao)
+            saveEntry(vm)
         }
     }
 
-    private fun saveEntry(weatherDao: com.example.xamu_wil_project.data.local.WeatherSoilDao) {
+    private fun saveEntry(vm: WeatherSoilViewModel) {
         val selectedPos = spinnerClients.selectedItemPosition
         if (selectedPos < 0 || selectedPos >= clients.size) {
             Toast.makeText(this, "Please select a client", Toast.LENGTH_SHORT).show()
@@ -92,19 +95,14 @@ class AddWeatherSoilActivity : AppCompatActivity() {
             notes = notes
         )
 
-        lifecycleScope.launch {
-            try {
-                val id = withContext(Dispatchers.IO) { weatherDao.insert(entity) }
-                if (id > 0) {
-                    Toast.makeText(this@AddWeatherSoilActivity, "Saved observation", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else {
-                    Toast.makeText(this@AddWeatherSoilActivity, "Could not save observation", Toast.LENGTH_LONG).show()
-                }
-            } catch (ex: Exception) {
-                Toast.makeText(this@AddWeatherSoilActivity, "Error saving: ${ex.message}", Toast.LENGTH_LONG).show()
+        // Use ViewModel to insert; it switches to IO internally and returns on main thread via callback
+        vm.insert(entity) { id ->
+            if (id > 0) {
+                Toast.makeText(this@AddWeatherSoilActivity, "Saved observation", Toast.LENGTH_SHORT).show()
+                finish()
+            } else {
+                Toast.makeText(this@AddWeatherSoilActivity, "Could not save observation", Toast.LENGTH_LONG).show()
             }
         }
     }
 }
-
