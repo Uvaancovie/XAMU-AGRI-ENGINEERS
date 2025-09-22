@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:elevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/textProjectName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:text="Project Name" />
+
+        <TextView
+            android:id="@+id/textLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location" />
+
+        <TextView
+            android:id="@+id/textElevation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Elevation" />
+
+        <TextView
+            android:id="@+id/textEcoregion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ecoregion" />
+
+        <TextView
+            android:id="@+id/textRainfall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rainfall" />
+
+        <TextView
+            android:id="@+id/textSoilType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Soil Type" />
+
+        <TextView
+            android:id="@+id/textWeather"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Weather" />
+
+        <TextView
+            android:id="@+id/textImpact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Impact" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+

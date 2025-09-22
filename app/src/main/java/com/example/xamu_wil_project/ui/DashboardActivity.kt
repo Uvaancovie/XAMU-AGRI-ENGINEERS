@@ -188,5 +188,11 @@ class DashboardActivity : AppCompatActivity() {
 
         val tvIntro = findViewById<TextView>(R.id.tvDashboardIntro)
         tvIntro.text = getString(R.string.dashboard_intro)
+
+        val btnViewFieldData = findViewById<Button>(R.id.btnViewFieldData)
+        btnViewFieldData.setOnClickListener {
+            val intent = Intent(this, FieldDataDemoActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
