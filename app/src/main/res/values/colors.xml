@@ -1,10 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryGreen">#2E7D32</color>
-    <color name="primaryGreenDark">#1B5E20</color>
-    <color name="primaryGreenLight">#60AD5E</color>
+    <!-- Material 3 Light Theme Colors -->
+    <color name="md_theme_light_primary">#2D5016</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#B0D292</color>
+    <color name="md_theme_light_onPrimaryContainer">#0B1500</color>
+    <color name="md_theme_light_secondary">#55624C</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#D8E7CB</color>
+    <color name="md_theme_light_onSecondaryContainer">#131F0D</color>
+    <color name="md_theme_light_tertiary">#386666</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#BBEBEB</color>
+    <color name="md_theme_light_onTertiaryContainer">#002020</color>
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+    <color name="md_theme_light_background">#FCFDF6</color>
+    <color name="md_theme_light_onBackground">#1A1C18</color>
+    <color name="md_theme_light_surface">#FCFDF6</color>
+    <color name="md_theme_light_onSurface">#1A1C18</color>
+    <color name="md_theme_light_surfaceVariant">#DFE4D7</color>
+    <color name="md_theme_light_onSurfaceVariant">#43483E</color>
+    <color name="md_theme_light_outline">#73796E</color>
+    <color name="md_theme_light_inverseOnSurface">#F1F1EB</color>
+    <color name="md_theme_light_inverseSurface">#2F312D</color>
+    <color name="md_theme_light_inversePrimary">#95B677</color>
+    <color name="md_theme_light_shadow">#000000</color>
+    <color name="md_theme_light_surfaceTint">#2D5016</color>
+    <color name="md_theme_light_outlineVariant">#C3C8BC</color>
+    <color name="md_theme_light_scrim">#000000</color>
+
+    <!-- Material 3 Dark Theme Colors -->
+    <color name="md_theme_dark_primary">#95B677</color>
+    <color name="md_theme_dark_onPrimary">#163800</color>
+    <color name="md_theme_dark_primaryContainer">#214408</color>
+    <color name="md_theme_dark_onPrimaryContainer">#B0D292</color>
+    <color name="md_theme_dark_secondary">#BCCBAF</color>
+    <color name="md_theme_dark_onSecondary">#283420</color>
+    <color name="md_theme_dark_secondaryContainer">#3E4B35</color>
+    <color name="md_theme_dark_onSecondaryContainer">#D8E7CB</color>
+    <color name="md_theme_dark_tertiary">#A4CFCF</color>
+    <color name="md_theme_dark_onTertiary">#073737</color>
+    <color name="md_theme_dark_tertiaryContainer">#1F4E4E</color>
+    <color name="md_theme_dark_onTertiaryContainer">#BBEBEB</color>
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+    <color name="md_theme_dark_background">#121510</color>
+    <color name="md_theme_dark_onBackground">#E2E3DD</color>
+    <color name="md_theme_dark_surface">#121510</color>
+    <color name="md_theme_dark_onSurface">#E2E3DD</color>
+    <color name="md_theme_dark_surfaceVariant">#43483E</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C3C8BC</color>
+    <color name="md_theme_dark_outline">#8D9387</color>
+    <color name="md_theme_dark_inverseOnSurface">#121510</color>
+    <color name="md_theme_dark_inverseSurface">#E2E3DD</color>
+    <color name="md_theme_dark_inversePrimary">#2D5016</color>
+    <color name="md_theme_dark_shadow">#000000</color>
+    <color name="md_theme_dark_surfaceTint">#95B677</color>
+    <color name="md_theme_dark_outlineVariant">#43483E</color>
+    <color name="md_theme_dark_scrim">#000000</color>
+
+    <!-- Additional colors for wetlands theme -->
+    <color name="wetland_green">#2D5016</color>
+    <color name="wetland_blue">#386666</color>
+    <color name="wetland_light_green">#95B677</color>
+
+    <!-- Missing colors referenced in the app -->
+    <color name="primaryGreen">#2D5016</color>
+    <color name="primaryGreenDark">#214408</color>
     <color name="onPrimary">#FFFFFF</color>
-    <color name="background">#FFFFFF</color>
-    <color name="backgroundLight">#F5F5F5</color>
-    <color name="textPrimary">#212121</color>
+    <color name="background">#FCFDF6</color>
 </resources>

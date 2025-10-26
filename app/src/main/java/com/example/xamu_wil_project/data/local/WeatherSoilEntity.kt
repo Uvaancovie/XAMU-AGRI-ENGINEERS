@@ -8,14 +8,17 @@ import androidx.room.PrimaryKey
  */
 @Entity(tableName = "weather_soil")
 data class WeatherSoilEntity(
-    @PrimaryKey(autoGenerate = true) var id: Long = 0,
-    var clientId: Long = 0,
-    var temperatureC: Double? = null,
-    var humidityPct: Double? = null,
-    var pressureHPa: Double? = null,
-    var soilMoisturePct: Double? = null,
-    var soilPH: Double? = null,
-    var notes: String = "",
-    var timestamp: Long = System.currentTimeMillis()
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val clientId: Long,
+    val dataType: String, // "weather" or "soil"
+    val temperature: String = "", // Changed to String to match UI input
+    val humidity: String = "", // Changed to String to match UI input
+    val pressure: String = "", // Changed to String to match UI input
+    val description: String = "",
+    val soilType: String = "",
+    val soilPh: String = "", // Changed to String to match UI input
+    val soilMoisture: String = "", // Changed to String to match UI input
+    val location: String = "",
+    val timestamp: Long = System.currentTimeMillis()
 )
-

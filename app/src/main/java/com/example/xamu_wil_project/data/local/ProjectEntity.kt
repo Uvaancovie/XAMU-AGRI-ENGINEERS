@@ -5,25 +5,29 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "projects")
 data class ProjectEntity(
-    @PrimaryKey(autoGenerate = true) var id: Long = 0,
-    var projectName: String = "",
-    var companyName: String = "",
-    var appUserUsername: String = "",
-    var companyEmail: String = ""
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val companyEmail: String,
+    val companyName: String,
+    val appUserUsername: String,
+    val projectName: String,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )
 
+// Extension functions for model conversion
 fun ProjectEntity.toModel() = com.example.xamu_wil_project.data.Project(
-    projectName = this.projectName,
+    id = this.id,
+    companyEmail = this.companyEmail,
     companyName = this.companyName,
     appUserUsername = this.appUserUsername,
-    companyEmail = this.companyEmail,
-    id = this.id
+    projectName = this.projectName
 )
 
 fun com.example.xamu_wil_project.data.Project.toEntity() = ProjectEntity(
     id = this.id ?: 0,
-    projectName = this.projectName.orEmpty(),
+    companyEmail = this.companyEmail.orEmpty(),
     companyName = this.companyName.orEmpty(),
     appUserUsername = this.appUserUsername.orEmpty(),
-    companyEmail = this.companyEmail.orEmpty()
+    projectName = this.projectName.orEmpty()
 )

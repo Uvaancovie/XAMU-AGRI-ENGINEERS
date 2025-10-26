@@ -16,4 +16,3 @@ interface WeatherSoilDao {
     @Query("DELETE FROM weather_soil WHERE clientId = :clientId")
     fun clearForClient(clientId: Long): Int
 }
-

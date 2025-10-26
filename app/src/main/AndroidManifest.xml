@@ -1,42 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
 
+    <!-- Network and Internet -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <!-- Camera -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
+    <!-- Location for GPS tracking -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
+    <!-- Storage for photos and offline data -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+
+    <!-- Notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
-        android:name=".App"
+        android:name=".XamuWetlandsApplication"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.WIL">
+        android:theme="@style/Theme.XamuWetlands"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
 
-        <activity android:name=".ui.SearchInternetActivity"/>
-        <activity android:name=".ui.DashboardActivity"/>
-        <activity android:name=".ui.AddClientActivity"/>
-        <activity android:name=".ui.SettingsActivity"/>
-        <activity android:name=".ui.ProjectDetailsActivity"/>
-        <activity android:name=".ui.AddDataToProjectActivity"/>
-        <activity android:name=".ui.AddProjectActivity"/>
-        <activity android:name=".ui.SelectProjectActivity"/>
-        <activity android:name=".ui.SelectClientActivity"/>
-        <activity android:name=".ui.RegisterActivity"/>
-        <activity android:name=".ui.LoginActivity"
-            android:exported="true">
+        <!-- Main Compose Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.XamuWetlands"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.AddWeatherSoilActivity" />
 
+        <!-- File Provider for camera and file sharing -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.xamu_wil_project.fileprovider"
@@ -48,4 +69,5 @@
         </provider>
 
     </application>
+
 </manifest>

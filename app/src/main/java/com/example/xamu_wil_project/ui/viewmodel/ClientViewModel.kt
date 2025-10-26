@@ -1,38 +1,62 @@
 package com.example.xamu_wil_project.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.xamu_wil_project.data.local.AppDatabase
-import com.example.xamu_wil_project.data.local.ClientEntity
-import com.example.xamu_wil_project.data.local.ClientRepository
-import kotlinx.coroutines.Dispatchers
+import com.example.xamu_wil_project.data.Client
+import com.example.xamu_wil_project.data.repository.FirebaseRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ClientViewModel(application: Application) : AndroidViewModel(application) {
-    private val repo = ClientRepository.getInstance(application)
-    val allClients: LiveData<List<ClientEntity>> = repo.observeAll()
+data class ClientUiState(
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val successMessage: String? = null
+)
 
-    fun insert(client: ClientEntity, onDone: (Long) -> Unit = {}) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val id = repo.insert(client)
-            onDone(id)
+@HiltViewModel
+class ClientViewModel @Inject constructor(
+    private val repository: FirebaseRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(ClientUiState())
+    val uiState: StateFlow<ClientUiState> = _uiState.asStateFlow()
+
+    val clients: StateFlow<List<Client>> = repository.getClientsFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    fun addClient(client: Client) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+
+            val result = repository.addClient(client)
+
+            _uiState.value = if (result.isSuccess) {
+                _uiState.value.copy(
+                    isLoading = false,
+                    successMessage = "Client added successfully",
+                    errorMessage = null
+                )
+            } else {
+                _uiState.value.copy(
+                    isLoading = false,
+                    successMessage = null,
+                    errorMessage = result.exceptionOrNull()?.message ?: "Failed to add client"
+                )
+            }
         }
     }
 
-    fun update(client: ClientEntity, onDone: (Int) -> Unit = {}) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val rows = repo.update(client)
-            onDone(rows)
-        }
-    }
-
-    fun clearAll(onDone: (Int) -> Unit = {}) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val rows = repo.clearAll()
-            onDone(rows)
-        }
+    fun clearMessages() {
+        _uiState.value = _uiState.value.copy(
+            successMessage = null,
+            errorMessage = null
+        )
     }
 }
 

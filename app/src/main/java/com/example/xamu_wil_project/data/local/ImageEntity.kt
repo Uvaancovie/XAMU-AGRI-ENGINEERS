@@ -5,12 +5,13 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "images")
 data class ImageEntity(
-    @PrimaryKey(autoGenerate = true) var id: Long = 0,
-    var companyName: String = "",
-    var projectName: String = "",
-    var storagePath: String = "",
-    var description: String = "",
-    var location: String = "",
-    var timestamp: Long = System.currentTimeMillis()
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val companyName: String,
+    val projectName: String,
+    val imagePath: String, // Field that ProjectDetailsActivity expects (not storagePath)
+    val description: String = "",
+    val location: String = "",
+    val timestamp: Long = System.currentTimeMillis(),
+    val isSynced: Boolean = false
 )
-

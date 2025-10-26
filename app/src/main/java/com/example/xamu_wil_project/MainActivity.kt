@@ -1,24 +1,35 @@
 package com.example.xamu_wil_project
 
-import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
-import com.example.xamu_wil_project.ui.SelectClientActivity
-import com.example.xamu_wil_project.ui.SettingsActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.example.xamu_wil_project.ui.navigation.XamuNavGraph
+import com.example.xamu_wil_project.ui.theme.XamuWetlandsTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-class MainActivity : AppCompatActivity() {
-    @SuppressLint("MissingInflatedId")
+/**
+ * Main Activity for Xamu Wetlands App
+ * Uses Jetpack Compose with Navigation and Hilt DI
+ */
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        findViewById<Button>(R.id.btnSelectClient).setOnClickListener {
-            startActivity(Intent(this, SelectClientActivity::class.java))
-        }
-        findViewById<Button>(R.id.btnSettings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+        setContent {
+            XamuWetlandsTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    XamuNavGraph(navController = navController)
+                }
+            }
         }
     }
 }
