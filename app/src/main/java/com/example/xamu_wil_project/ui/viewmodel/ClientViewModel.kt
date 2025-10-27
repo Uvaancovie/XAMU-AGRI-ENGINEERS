@@ -52,6 +52,50 @@ class ClientViewModel @Inject constructor(
         }
     }
 
+    fun updateClient(client: Client) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+
+            val result = repository.updateClient(client)
+
+            _uiState.value = if (result.isSuccess) {
+                _uiState.value.copy(
+                    isLoading = false,
+                    successMessage = "Client updated successfully",
+                    errorMessage = null
+                )
+            } else {
+                _uiState.value.copy(
+                    isLoading = false,
+                    successMessage = null,
+                    errorMessage = result.exceptionOrNull()?.message ?: "Failed to update client"
+                )
+            }
+        }
+    }
+
+    fun deleteClient(client: Client) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+
+            val result = repository.deleteClient(client)
+
+            _uiState.value = if (result.isSuccess) {
+                _uiState.value.copy(
+                    isLoading = false,
+                    successMessage = "Client deleted successfully",
+                    errorMessage = null
+                )
+            } else {
+                _uiState.value.copy(
+                    isLoading = false,
+                    successMessage = null,
+                    errorMessage = result.exceptionOrNull()?.message ?: "Failed to delete client"
+                )
+            }
+        }
+    }
+
     fun clearMessages() {
         _uiState.value = _uiState.value.copy(
             successMessage = null,
@@ -59,4 +103,3 @@ class ClientViewModel @Inject constructor(
         )
     }
 }
-

@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectProjectScreen(
+    clientName: String,
     onNavigateBack: () -> Unit,
     onProjectSelected: (Project) -> Unit,
     onAddProject: () -> Unit,
@@ -36,14 +37,17 @@ fun SelectProjectScreen(
 
     var searchQuery by remember { mutableStateOf("") }
 
+    val clientProjects = remember(projects, clientName) {
+        projects.filter { it.companyName == clientName }
+    }
+
     // Filter projects based on search query
-    val filteredProjects = remember(projects, searchQuery) {
+    val filteredProjects = remember(clientProjects, searchQuery) {
         if (searchQuery.isBlank()) {
-            projects
+            clientProjects
         } else {
-            projects.filter { project ->
-                project.projectName?.contains(searchQuery, ignoreCase = true) == true ||
-                project.companyName?.contains(searchQuery, ignoreCase = true) == true
+            clientProjects.filter { project ->
+                project.projectName?.contains(searchQuery, ignoreCase = true) == true
             }
         }
     }
@@ -53,7 +57,7 @@ fun SelectProjectScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Select Project",
+                        text = "Select Project for $clientName",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -118,9 +122,9 @@ fun SelectProjectScreen(
             ) {
                 Text(
                     text = if (searchQuery.isBlank()) {
-                        "All Projects (${projects.size})"
+                        "All Projects (${clientProjects.size})"
                     } else {
-                        "Found ${filteredProjects.size} of ${projects.size} projects"
+                        "Found ${filteredProjects.size} of ${clientProjects.size} projects"
                     },
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -134,10 +138,10 @@ fun SelectProjectScreen(
             }
 
             // Projects List
-            if (filteredProjects.isEmpty() && projects.isNotEmpty()) {
+            if (filteredProjects.isEmpty() && clientProjects.isNotEmpty()) {
                 // No search results
                 EmptySearchResults(searchQuery = searchQuery)
-            } else if (projects.isEmpty()) {
+            } else if (clientProjects.isEmpty()) {
                 // No projects at all
                 EmptyProjectsState(onAddProject = onAddProject)
             } else {

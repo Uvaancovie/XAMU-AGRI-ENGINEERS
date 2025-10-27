@@ -1,5 +1,6 @@
 package com.example.xamu_wil_project.ui.compose.screens
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,13 +10,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.xamu_wil_project.data.Client
 import com.example.xamu_wil_project.ui.compose.components.*
 import com.example.xamu_wil_project.ui.viewmodel.ClientViewModel
-import com.example.xamu_wil_project.data.Client
 
 /**
  * Professional Select Client Screen - Jetpack Compose
@@ -27,6 +29,7 @@ fun SelectClientScreen(
     onNavigateBack: () -> Unit,
     onClientSelected: (Client) -> Unit,
     onAddClient: () -> Unit,
+    onEditClient: (Client) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ClientViewModel = hiltViewModel()
 ) {
@@ -34,6 +37,8 @@ fun SelectClientScreen(
     val clients by viewModel.clients.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedClient by remember { mutableStateOf<Client?>(null) }
 
     // Filter clients based on search query
     val filteredClients = remember(clients, searchQuery) {
@@ -42,8 +47,8 @@ fun SelectClientScreen(
         } else {
             clients.filter { client ->
                 client.companyName?.contains(searchQuery, ignoreCase = true) == true ||
-                client.companyType?.contains(searchQuery, ignoreCase = true) == true ||
-                client.companyEmail?.contains(searchQuery, ignoreCase = true) == true
+                        client.companyType?.contains(searchQuery, ignoreCase = true) == true ||
+                        client.companyEmail?.contains(searchQuery, ignoreCase = true) == true
             }
         }
     }
@@ -142,12 +147,44 @@ fun SelectClientScreen(
                     items(filteredClients) { client ->
                         ClientSelectionCard(
                             client = client,
-                            onClientSelected = { onClientSelected(client) }
+                            onClientSelected = { onClientSelected(client) },
+                            onLongPress = {
+                                selectedClient = client
+                                showDialog = true
+                            }
                         )
                     }
                 }
             }
         }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Client Options") },
+            text = { Text("What would you like to do with ${selectedClient?.companyName}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        onEditClient(selectedClient!!)
+                    }
+                ) {
+                    Text("Edit")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        viewModel.deleteClient(selectedClient!!)
+                    }
+                ) {
+                    Text("Delete")
+                }
+            }
+        )
     }
 }
 
@@ -192,11 +229,18 @@ private fun SearchBar(
 @Composable
 private fun ClientSelectionCard(
     client: Client,
-    onClientSelected: () -> Unit
+    onClientSelected: () -> Unit,
+    onLongPress: () -> Unit
 ) {
     Card(
-        onClick = onClientSelected,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onClientSelected() },
+                    onLongPress = { onLongPress() }
+                )
+            },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp,
             pressedElevation = 1.dp
@@ -276,7 +320,9 @@ private fun ClientSelectionCard(
 @Composable
 private fun EmptySearchResults(searchQuery: String) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(32.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -305,7 +351,9 @@ private fun EmptySearchResults(searchQuery: String) {
 @Composable
 private fun EmptyClientsState(onAddClient: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(32.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {

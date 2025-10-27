@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun DashboardScreen(
     onNavigateToClients: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToWeather: () -> Unit,
     onLogout: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
     dashboardViewModel: DashboardViewModel = hiltViewModel()
@@ -48,7 +49,7 @@ fun DashboardScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Welcome, ${currentUser?.displayName ?: "User"}",
+                            text = "Welcome, ${currentUser?.email ?: "User"}",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -69,7 +70,7 @@ fun DashboardScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    titleContentC,olor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
@@ -167,7 +168,8 @@ fun DashboardScreen(
                 DashboardCard(
                     title = "Weather & Conditions",
                     subtitle = "Check current weather for field sites",
-                    icon = Icons.Filled.Cloud
+                    icon = Icons.Filled.Cloud,
+                    onClick = onNavigateToWeather
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -356,4 +358,3 @@ private fun RecentProjectCard(
         }
     }
 }
-

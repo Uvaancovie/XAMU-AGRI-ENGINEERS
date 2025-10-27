@@ -46,26 +46,28 @@ class DashboardViewModel @Inject constructor(
                     totalProjects = projects.size,
                     recentProjects = projects.take(5)
                 )
+
+                // Load notes and routes for each project
+                var totalNotes = 0
+                var totalRoutes = 0
+                projects.forEach { project ->
+                    repository.getNotesFlow(project.companyName ?: "", project.projectName ?: "").collect { notes ->
+                        totalNotes += notes.size
+                    }
+                    repository.getRoutesFlow(project.companyName ?: "", project.projectName ?: "").collect { routes ->
+                        totalRoutes += routes.size
+                    }
+                }
+                _uiState.value = _uiState.value.copy(
+                    totalNotes = totalNotes,
+                    totalRoutes = totalRoutes
+                )
             }
 
             // Load clients count
             repository.getClientsFlow().collect { clients ->
                 _uiState.value = _uiState.value.copy(
                     totalClients = clients.size
-                )
-            }
-
-            // Load notes count
-            repository.getNotesFlow(userEmail, "").collect { notes ->
-                _uiState.value = _uiState.value.copy(
-                    totalNotes = notes.size
-                )
-            }
-
-            // Load routes count
-            repository.getRoutesFlow(userEmail, "").collect { routes ->
-                _uiState.value = _uiState.value.copy(
-                    totalRoutes = routes.size
                 )
             }
         }

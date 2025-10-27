@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.xamu_wil_project.data.Client
 import com.example.xamu_wil_project.ui.compose.screens.*
 
 /**
@@ -20,6 +21,9 @@ sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
     object ClientList : Screen("clients")
     object AddClient : Screen("add_client")
+    object EditClient : Screen("edit_client/{clientName}") {
+        fun createRoute(clientName: String) = "edit_client/$clientName"
+    }
     object ProjectList : Screen("projects/{clientName}") {
         fun createRoute(clientName: String) = "projects/$clientName"
     }
@@ -39,6 +43,7 @@ sealed class Screen(val route: String) {
             "view_data/$companyName/$projectName"
     }
     object Settings : Screen("settings")
+    object Weather : Screen("weather")
 }
 
 @Composable
@@ -84,6 +89,7 @@ fun XamuNavGraph(
             DashboardScreen(
                 onNavigateToClients = { navController.navigate(Screen.ClientList.route) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onNavigateToWeather = { navController.navigate(Screen.Weather.route) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -99,7 +105,10 @@ fun XamuNavGraph(
                 onClientSelected = { client ->
                     navController.navigate(Screen.ProjectList.createRoute(client.companyName ?: ""))
                 },
-                onAddClient = { navController.navigate(Screen.AddClient.route) }
+                onAddClient = { navController.navigate(Screen.AddClient.route) },
+                onEditClient = { client ->
+                    navController.navigate(Screen.EditClient.createRoute(client.companyName ?: ""))
+                }
             )
         }
 
@@ -111,6 +120,20 @@ fun XamuNavGraph(
             )
         }
 
+        // Edit Client
+        composable(
+            route = Screen.EditClient.route,
+            arguments = listOf(navArgument("clientName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val clientName = backStackEntry.arguments?.getString("clientName") ?: ""
+            // You'll need a way to get the client object from the clientName
+            // For now, we'll just pass an empty client
+            EditClientScreen(
+                onNavigateBack = { navController.popBackStack() },
+                client = Client(companyName = clientName)
+            )
+        }
+
         // Project List
         composable(
             route = Screen.ProjectList.route,
@@ -118,6 +141,7 @@ fun XamuNavGraph(
         ) { backStackEntry ->
             val clientName = backStackEntry.arguments?.getString("clientName") ?: ""
             SelectProjectScreen(
+                clientName = clientName,
                 onNavigateBack = { navController.popBackStack() },
                 onProjectSelected = { project ->
                     navController.navigate(
@@ -203,6 +227,13 @@ fun XamuNavGraph(
         // Settings
         composable(Screen.Settings.route) {
             SettingsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Weather
+        composable(Screen.Weather.route) {
+            WeatherScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
