@@ -10,6 +10,7 @@ Table of contents
 - Architecture & file map
 - Prerequisites
 - Quick setup & build (Windows)
+- Git workflow and pulling latest changes
 - Firebase configuration (Realtime Database + Auth)
 - AppCheck and debug provider guidance
 - Compose-only notes (no XML required)
@@ -64,6 +65,24 @@ gradlew.bat assembleDebug
 :: install on a connected device
 gradlew.bat installDebug
 ```
+
+Git workflow and pulling latest changes
+---------------------------------------
+When working with feature branches (e.g., `feature/client-crud-and-project-filtering`), you may need to pull the latest changes from the remote repository.
+
+**Quick Command:**
+```bash
+git pull origin feature/your-branch-name
+```
+
+**For comprehensive guidance including:**
+- Handling uncommitted local changes
+- Resolving merge conflicts
+- Using git stash
+- Pulling with rebase for cleaner history
+- Troubleshooting common git issues
+
+See our detailed **[Git Workflow Guide](app/src/main/java/documentation/git-workflow.md)**.
 
 Firebase configuration (Realtime Database + Auth)
 ------------------------------------------------
