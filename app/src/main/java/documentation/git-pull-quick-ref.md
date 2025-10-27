@@ -43,7 +43,7 @@ git pull origin feature/client-crud-and-project-filtering
 
 **Option 2: Stash temporarily**
 ```bash
-git stash save "WIP: My work in progress"
+git stash push -m "WIP: My work in progress"
 git pull origin feature/client-crud-and-project-filtering
 git stash pop
 ```
@@ -62,7 +62,7 @@ git stash pop
 
 ## 📚 Need More Help?
 
-See the complete guide: [git-workflow.md](./git-workflow.md)
+See the [complete Git Workflow Guide](./git-workflow.md) for detailed scenarios and troubleshooting.
 
 ---
 

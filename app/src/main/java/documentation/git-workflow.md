@@ -89,7 +89,7 @@ git pull origin feature/client-crud-and-project-filtering
 
 ```bash
 # Save your uncommitted changes
-git stash save "WIP: Description of what I was working on"
+git stash push -m "WIP: Description of what I was working on"
 
 # Pull the latest changes
 git pull origin feature/client-crud-and-project-filtering
