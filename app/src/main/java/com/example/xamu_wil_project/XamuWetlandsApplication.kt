@@ -2,9 +2,11 @@ package com.example.xamu_wil_project
 
 import android.app.Application
 import android.util.Log
+import com.cloudinary.android.MediaManager
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.HiltAndroidApp
+import com.example.xamu_wil_project.cloudinary.CloudinaryHelper
 
 /**
  * Application class for Xamu Wetlands
@@ -32,6 +34,22 @@ class XamuWetlandsApplication : Application() {
             Log.d("XamuWetlandsApp", "Firebase initialized successfully with database URL: https://xamu-wil-default-rtdb.firebaseio.com/")
         } catch (e: Exception) {
             Log.e("XamuWetlandsApp", "Error initializing Firebase", e)
+        }
+
+        // Initialize Cloudinary
+        val config = hashMapOf(
+            "cloud_name" to "dir468aeq",
+            "secure" to true
+        )
+        MediaManager.init(this, config)
+
+        // Set the upload preset used for unsigned uploads (change to match your Cloudinary preset)
+        try {
+            val preset = "XAMU" // user's preset name
+            CloudinaryHelper.setUploadPreset(preset)
+            Log.d("XamuWetlandsApp", "Cloudinary initialized with cloud_name=dir468aeq and preset=$preset")
+        } catch (e: Exception) {
+            Log.e("XamuWetlandsApp", "Error initializing Cloudinary preset", e)
         }
     }
 }

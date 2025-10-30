@@ -12,12 +12,9 @@ import com.example.xamu_wil_project.ui.navigation.XamuNavGraph
 import com.example.xamu_wil_project.ui.theme.XamuWetlandsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * Main Activity for Xamu Wetlands App
- * Uses Jetpack Compose with Navigation and Hilt DI
- */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

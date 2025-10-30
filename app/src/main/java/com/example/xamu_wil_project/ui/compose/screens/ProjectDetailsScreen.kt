@@ -5,7 +5,11 @@ import android.net.Uri
 import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,18 +18,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.xamu_wil_project.data.BiophysicalAttributes
 import com.example.xamu_wil_project.ui.compose.components.*
 import com.example.xamu_wil_project.ui.viewmodel.ProjectDetailsViewModel
 import com.example.xamu_wil_project.ui.viewmodel.WeatherViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Enhanced Project Details Screen with full field data capture
@@ -42,6 +52,8 @@ fun ProjectDetailsScreen(
     projectName: String,
     onNavigateBack: () -> Unit,
     onNavigateToAddData: () -> Unit,
+    onNavigateToViewData: () -> Unit,
+    onNavigateToProjectImages: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProjectDetailsViewModel = hiltViewModel(),
     weatherViewModel: WeatherViewModel = hiltViewModel()
@@ -52,13 +64,10 @@ fun ProjectDetailsScreen(
 
     var showAddNoteDialog by remember { mutableStateOf(false) }
     var showWeatherDialog by remember { mutableStateOf(false) }
-    var showCameraOptions by remember { mutableStateOf(false) }
     var currentLatitude by remember { mutableDoubleStateOf(-29.8587) }
     var currentLongitude by remember { mutableDoubleStateOf(31.0218) }
-    var photoUri by remember { mutableStateOf<Uri?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
 
     // Location permission launcher
     val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -78,42 +87,6 @@ fun ProjectDetailsScreen(
             } catch (e: SecurityException) {
                 // Permission denied
             }
-        }
-    }
-
-    // Camera launcher - take picture into supplied Uri
-    val cameraLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            // use local val to avoid smart-cast issues on delegated property
-            val uri = photoUri
-            uri?.let {
-                viewModel.uploadPhoto(
-                    companyName = companyName,
-                    projectName = projectName,
-                    photoUri = it,
-                    caption = "Field Photo",
-                    location = "$currentLatitude, $currentLongitude"
-                )
-            }
-            showCameraOptions = false
-        }
-    }
-
-    // Gallery launcher
-    val galleryLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let {
-            viewModel.uploadPhoto(
-                companyName = companyName,
-                projectName = projectName,
-                photoUri = it,
-                caption = "Field Photo",
-                location = "$currentLatitude, $currentLongitude"
-            )
-            showCameraOptions = false
         }
     }
 
@@ -237,9 +210,12 @@ fun ProjectDetailsScreen(
                     weatherViewModel.fetchWeather(currentLatitude, currentLongitude)
                     showWeatherDialog = true
                 },
-                onTakePhoto = { showCameraOptions = true },
+                onTakePhoto = onNavigateToProjectImages,
                 onNavigateToAddData = onNavigateToAddData
             )
+
+            // Biophysical Data
+            BiophysicalDataSection(uiState.biophysical, onNavigateToViewData)
 
             // Project Data Summary
             ProjectDataSummary(
@@ -252,6 +228,9 @@ fun ProjectDetailsScreen(
             if (uiState.notes.isNotEmpty()) {
                 RecentNotesSection(notes = uiState.notes.take(3))
             }
+
+            // Photos Section - show recent uploaded photos with caption and date
+            PhotosSection(photos = uiState.photos, onOpenGallery = onNavigateToProjectImages)
         }
     }
 
@@ -276,77 +255,48 @@ fun ProjectDetailsScreen(
     // Weather Dialog
     if (showWeatherDialog) {
         WeatherDialog(
-            weatherData = weatherState.weatherData,
-            isLoading = weatherState.isLoading,
-            errorMessage = weatherState.errorMessage,
+            weatherState = weatherState,
             onDismiss = { showWeatherDialog = false }
         )
     }
+}
 
-    // Camera Options Dialog
-    if (showCameraOptions) {
-        AlertDialog(
-            onDismissRequest = { showCameraOptions = false },
-            title = { Text("Add Photo") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Choose photo source:")
-                    Button(
-                        onClick = {
-                            try {
-                                val photoFile = File(context.cacheDir, "photo_${System.currentTimeMillis()}.jpg")
-                                photoFile.parentFile?.mkdirs()
-                                if (!photoFile.exists()) {
-                                    photoFile.createNewFile()
-                                }
-                                val uri = FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.fileprovider",
-                                    photoFile
-                                )
-                                photoUri = uri
-                                cameraLauncher.launch(uri)
-                            } catch (e: Exception) {
-                                // If file creation or FileProvider fails, show an error via snackbar
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        "Unable to create photo file: ${e.message}",
-                                        duration = SnackbarDuration.Long
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Filled.Camera, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Take Photo")
-                    }
-                    OutlinedButton(
-                        onClick = { galleryLauncher.launch("image/*") },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Filled.Photo, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Choose from Gallery")
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { showCameraOptions = false }) {
-                    Text("Cancel")
-                }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BiophysicalDataSection(biophysicalData: List<BiophysicalAttributes>, onNavigateToViewData: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onNavigateToViewData),
+        onClick = onNavigateToViewData // Redundant but ensures clickability
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Landscape,
+                contentDescription = "Biophysical Data",
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Biophysical Data",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = if (biophysicalData.isEmpty()) "No data recorded. Tap to add." else "${biophysicalData.size} entries. Tap to view.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        )
-    }
-
-    // Track route points if active
-    LaunchedEffect(uiState.isTrackingRoute) {
-        if (uiState.isTrackingRoute) {
-            // Add route point every 30 seconds
-            kotlinx.coroutines.delay(30000)
-            viewModel.addRoutePoint(currentLatitude, currentLongitude)
+            Icon(
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = null
+            )
         }
     }
 }
@@ -626,9 +576,7 @@ private fun AddNoteDialog(
 
 @Composable
 private fun WeatherDialog(
-    weatherData: com.example.xamu_wil_project.data.WeatherResponse?,
-    isLoading: Boolean,
-    errorMessage: String?,
+    weatherState: com.example.xamu_wil_project.ui.viewmodel.WeatherUiState,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -636,25 +584,18 @@ private fun WeatherDialog(
         title = { Text("Current Weather") },
         text = {
             when {
-                isLoading -> {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                weatherState.isLoading -> {
+                    CircularProgressIndicator()
                 }
-                errorMessage != null -> {
-                    Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                weatherState.error != null -> {
+                    Text("Error: ${weatherState.error}")
                 }
-                weatherData != null -> {
+                weatherState.weatherData != null -> {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Location: ${weatherData.location?.name ?: "Unknown"}")
-                        Text("Temperature: ${weatherData.current?.temp_c}°C")
-                        Text("Condition: ${weatherData.current?.condition?.text ?: ""}")
-                        Text("Humidity: ${weatherData.current?.humidity}%")
-                        Text("Wind: ${weatherData.current?.wind_kph} km/h")
+                        Text("Location: ${weatherState.weatherData.location.name}")
+                        Text("Temperature: ${weatherState.weatherData.current.temp_c}°C")
+                        Text("Condition: ${weatherState.weatherData.current.condition.text}")
                     }
-                }
-                else -> {
-                    Text("No weather data available")
                 }
             }
         },
@@ -664,4 +605,47 @@ private fun WeatherDialog(
             }
         }
     )
+}
+
+@Composable
+private fun PhotosSection(photos: List<com.example.xamu_wil_project.data.FieldPhoto>, onOpenGallery: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(text = "Photos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(onClick = onOpenGallery) { Text("Open gallery") }
+            }
+
+            if (photos.isEmpty()) {
+                Text("No photos yet. Tap 'Open gallery' to add.", style = MaterialTheme.typography.bodySmall)
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(photos) { p ->
+                        Column(modifier = Modifier.width(180.dp).clickable { /* open full screen later */ }) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(p.url)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = p.caption,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(text = p.caption, maxLines = 2, style = MaterialTheme.typography.bodySmall)
+                            val formatted = remember(p.timestamp) {
+                                val sdf = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault())
+                                sdf.format(Date(p.timestamp))
+                            }
+                            Text(text = formatted, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

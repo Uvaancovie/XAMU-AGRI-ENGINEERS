@@ -1,1 +1,412 @@
-package com.example.xamu_wil_project.data.repository\n\nimport android.util.Log\nimport com.example.xamu_wil_project.data.*\nimport com.google.firebase.auth.FirebaseAuth\nimport com.google.firebase.database.*\nimport com.google.firebase.storage.FirebaseStorage\nimport kotlinx.coroutines.channels.awaitClose\nimport kotlinx.coroutines.flow.Flow\nimport kotlinx.coroutines.flow.callbackFlow\nimport kotlinx.coroutines.tasks.await\nimport javax.inject.Inject\nimport javax.inject.Singleton\n\n/**\n * Firebase Repository - Primary data source for Xamu Wetlands App\n * Implements Firebase Realtime Database + Storage for all data operations\n */\n@Singleton\nclass FirebaseRepository @Inject constructor() {\n\n    companion object {\n        // Ensure we always connect to the intended Realtime Database URL\n        private const val DATABASE_URL = \"https://xamu-wil-default-rtdb.firebaseio.com/\"\n    }\n\n    // Use the explicit DB instance for all operations (avoids ambiguity when multiple DBs are present)\n    private val database: FirebaseDatabase = FirebaseDatabase.getInstance(DATABASE_URL)\n    private val storage = FirebaseStorage.getInstance()\n    private val auth = FirebaseAuth.getInstance()\n\n    // Client Operations\n    fun getClientsFlow(): Flow<List<Client>> = callbackFlow {\n        val ref = database.getReference(\"ClientInfo\")\n        val listener = ref.addValueEventListener(object : ValueEventListener {\n            override fun onDataChange(snapshot: DataSnapshot) {\n                val clients = mutableListOf<Client>()\n                for (child in snapshot.children) {\n                    child.getValue(Client::class.java)?.let { clients.add(it) }\n                }\n                trySend(clients)\n            }\n            override fun onCancelled(error: DatabaseError) {\n                close(error.toException())\n            }\n        })\n        awaitClose { ref.removeEventListener(listener) }\n    }\n\n    suspend fun addClient(client: Client): Result<String> {\n        return try {\n            Log.d(\"FirebaseRepository\", \"Attempting to add client: ${client.companyName}\")\n            val ref = database.getReference(\"ClientInfo\").push()\n            ref.setValue(client).await()\n            Log.d(\"FirebaseRepository\", \"Client added successfully with key: ${ref.key}\")\n            Result.success(ref.key ?: \"\")\n        } catch (e: Exception) {\n            Log.e(\"FirebaseRepository\", \"Failed to add client: ${e.message}\", e)\n            Result.failure(e)\n        }\n    }\n\n    suspend fun updateClient(client: Client): Result<Unit> {\n        return try {\n            val ref = database.getReference(\"ClientInfo\").orderByChild(\"companyName\").equalTo(client.companyName)\n            ref.addListenerForSingleValueEvent(object : ValueEventListener {\n                override fun onDataChange(snapshot: DataSnapshot) {\n                    for (child in snapshot.children) {\n                        child.ref.setValue(client)\n                    }\n                }\n                override fun onCancelled(error: DatabaseError) {\n                }\n            })\n            Result.success(Unit)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    suspend fun deleteClient(client: Client): Result<Unit> {\n        return try {\n            val ref = database.getReference(\"ClientInfo\").orderByChild(\"companyName\").equalTo(client.companyName)\n            ref.addListenerForSingleValueEvent(object : ValueEventListener {\n                override fun onDataChange(snapshot: DataSnapshot) {\n                    for (child in snapshot.children) {\n                        child.ref.removeValue()\n                    }\n                }\n                override fun onCancelled(error: DatabaseError) {\n                }\n            })\n            Result.success(Unit)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    // Project Operations\n    fun getProjectsFlow(userEmail: String): Flow<List<Project>> = callbackFlow {\n        val ref = database.getReference(\"ProjectsInfo\")\n        val listener = ref.orderByChild(\"appUserUsername\").equalTo(userEmail)\n            .addValueEventListener(object : ValueEventListener {\n                override fun onDataChange(snapshot: DataSnapshot) {\n                    val projects = mutableListOf<Project>()\n                    for (child in snapshot.children) {\n                        child.getValue(Project::class.java)?.let { projects.add(it) }\n                    }\n                    trySend(projects)\n                }\n                override fun onCancelled(error: DatabaseError) {\n                    close(error.toException())\n                }\n            })\n        awaitClose { ref.removeEventListener(listener) }\n    }\n\n    suspend fun addProject(project: Project): Result<String> {\n        return try {\n            val ref = database.getReference(\"ProjectsInfo\").push()\n            ref.setValue(project).await()\n            Result.success(ref.key ?: \"\")\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    // Note Operations\n    suspend fun addNote(companyName: String, projectName: String, note: Note): Result<String> {\n        return try {\n            val ref = database.getReference(\"ProjectData/$companyName/$projectName/Notes\").push()\n            ref.setValue(note).await()\n            Result.success(ref.key ?: \"\")\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    fun getNotesFlow(companyName: String, projectName: String): Flow<List<Note>> = callbackFlow {\n        val ref = database.getReference(\"ProjectData/$companyName/$projectName/Notes\")\n        val listener = ref.addValueEventListener(object : ValueEventListener {\n            override fun onDataChange(snapshot: DataSnapshot) {\n                val notes = mutableListOf<Note>()\n                for (child in snapshot.children) {\n                    child.getValue(Note::class.java)?.let { notes.add(it) }\n                }\n                trySend(notes)\n            }\n            override fun onCancelled(error: DatabaseError) {\n                close(error.toException())\n            }\n        })\n        awaitClose { ref.removeEventListener(listener) }\n    }\n\n    // Route Operations\n    suspend fun saveRoute(companyName: String, projectName: String, route: Route): Result<String> {\n        return try {\n            val ref = database.getReference(\"ProjectData/$companyName/$projectName/Routes/${route.routeId}\")\n            ref.setValue(route).await()\n            Result.success(route.routeId)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    fun getRoutesFlow(companyName: String, projectName: String): Flow<List<Route>> = callbackFlow {\n        val ref = database.getReference(\"ProjectData/$companyName/$projectName/Routes\")\n        val listener = ref.addValueEventListener(object : ValueEventListener {\n            override fun onDataChange(snapshot: DataSnapshot) {\n                val routes = mutableListOf<Route>()\n                for (child in snapshot.children) {\n                    child.getValue(Route::class.java)?.let { routes.add(it) }\n                }\n                trySend(routes)\n            }\n            override fun onCancelled(error: DatabaseError) {\n                close(error.toException())\n            }\n        })\n        awaitClose { ref.removeEventListener(listener) }\n    }\n\n    // Project Data Operations\n    fun getProjectDataFlow(companyName: String, projectName: String): Flow<ProjectData> = callbackFlow {\n        val ref = database.getReference(\"ProjectData/$companyName/$projectName\")\n        val listener = ref.addValueEventListener(object : ValueEventListener {\n            override fun onDataChange(snapshot: DataSnapshot) {\n                val notes = mutableListOf<Note>()\n                val routes = mutableListOf<Route>()\n                val photos = mutableListOf<FieldPhoto>()\n                val weatherData = mutableListOf<WeatherSoilData>()\n\n                snapshot.child(\"Notes\").children.forEach { child ->\n                    child.getValue(Note::class.java)?.let { notes.add(it) }\n                }\n                snapshot.child(\"Routes\").children.forEach { child ->\n                    child.getValue(Route::class.java)?.let { routes.add(it) }\n                }\n                snapshot.child(\"Photos\).children.forEach { child ->\n                    child.getValue(FieldPhoto::class.java)?.let { photos.add(it) }\n                }\n                snapshot.child(\"WeatherSoil\").children.forEach { child ->\n                    child.getValue(WeatherSoilData::class.java)?.let { weatherData.add(it) }\n                }\n\n                val biophysical = snapshot.child(\"Biophysical\").getValue(BiophysicalAttributes::class.java)\n                val impacts = snapshot.child(\"Impacts\").getValue(PhaseImpacts::class.java)\n\n                val projectData = ProjectData(\n                    biophysical = biophysical,\n                    impacts = impacts,\n                    notes = notes,\n                    routes = routes,\n                    photos = photos,\n                    weatherData = weatherData,\n                    lastUpdated = System.currentTimeMillis()\n                )\n                trySend(projectData)\n            }\n            override fun onCancelled(error: DatabaseError) {\n                close(error.toException())\n            }\n        })\n        awaitClose { ref.removeEventListener(listener) }\n    }\n\n    // Biophysical Data Operations\n    suspend fun saveBiophysicalData(\n        companyName: String,\n        projectName: String,\n        data: BiophysicalAttributes\n    ): Result<Unit> {\n        return try {\n            database.getReference(\"ProjectData/$companyName/$projectName/Biophysical\")\n                .setValue(data).await()\n            Result.success(Unit)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    // Impact Data Operations\n    suspend fun saveImpactData(\n        companyName: String,\n        projectName: String,\n        data: PhaseImpacts\n    ): Result<Unit> {\n        return try {\n            database.getReference(\"ProjectData/$companyName/$projectName/Impacts\")\n                .setValue(data).await()\n            Result.success(Unit)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    // Weather & Soil Operations\n    suspend fun addWeatherSoilData(\n        companyName: String,\n        projectName: String,\n        data: WeatherSoilData\n    ): Result<String> {\n        return try {\n            val ref = database.getReference(\"ProjectData/$companyName/$projectName/WeatherSoil\")\n                .push()\n            ref.setValue(data).await()\n            Result.success(ref.key ?: \"\")\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    // User Profile Operations\n    suspend fun createOrUpdateUser(uid: String, user: AppUser): Result<Unit> {\n        return try {\n            database.getReference(\"AppUsers/$uid\").setValue(user).await()\n            Result.success(Unit)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    fun getUserProfile(uid: String): Flow<AppUser?> = callbackFlow {\n        val ref = database.getReference(\"AppUsers/$uid\")\n        val listener = ref.addValueEventListener(object : ValueEventListener {\n            override fun onDataChange(snapshot: DataSnapshot) {\n                val user = snapshot.getValue(AppUser::class.java)\n                trySend(user)\n            }\n            override fun onCancelled(error: DatabaseError) {\n                close(error.toException())\n            }\n        })\n        awaitClose { ref.removeEventListener(listener) }\n    }\n\n    // User Settings Operations\n    suspend fun saveUserSettings(settings: UserSettings): Result<Unit> {\n        return try {\n            val uid = auth.currentUser?.uid ?: return Result.failure(Exception(\"User not logged in\"))\n            database.getReference(\"UserSettings/$uid/AppSettings\").setValue(settings).await()\n            Result.success(Unit)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n\n    fun getUserSettingsFlow(): Flow<UserSettings?> = callbackFlow {\n        val uid = auth.currentUser?.uid\n        if (uid == null) {\n            trySend(null)\n            close()\n            return@callbackFlow\n        }\n\n        val ref = database.getReference(\"UserSettings/$uid/AppSettings\")\n        val listener = ref.addValueEventListener(object : ValueEventListener {\n            override fun onDataChange(snapshot: DataSnapshot) {\n                val settings = snapshot.getValue(UserSettings::class.java)\n                trySend(settings)\n            }\n            override fun onCancelled(error: DatabaseError) {\n                close(error.toException())\n            }\n        })\n        awaitClose { ref.removeEventListener(listener) }\n    }\n\n    // Photo Upload Operations\n    suspend fun uploadPhoto(\n        companyName: String,\n        projectName: String,\n        photoUri: android.net.Uri,\n        caption: String,\n        location: String\n    ): Result<FieldPhoto> {\n        return try {\n            val photoId = System.currentTimeMillis().toString()\n            val storageRef = storage.reference\n                .child(\"projects/$companyName/$projectName/photos/$photoId.jpg\")\n\n            val uploadTask = storageRef.putFile(photoUri).await()\n            val downloadUrl = storageRef.downloadUrl.await()\n\n            val photo = FieldPhoto(\n                photoId = photoId,\n                url = downloadUrl.toString(),\n                caption = caption,\n                location = location,\n                timestamp = System.currentTimeMillis(),\n                userId = auth.currentUser?.uid ?: \"\",\n                uploadStatus = \"completed\"\n            )\n\n            database.getReference(\"ProjectData/$companyName/$projectName/Photos/$photoId\")\n                .setValue(photo).await()\n\n            Result.success(photo)\n        } catch (e: Exception) {\n            Result.failure(e)\n        }\n    }\n}\n
+package com.example.xamu_wil_project.data.repository
+
+import android.net.Uri
+import android.util.Log
+import com.example.xamu_wil_project.data.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Firebase Repository - Primary data source for Xamu Wetlands App
+ * Implements Firebase Realtime Database + Supabase Storage for all data operations
+ */
+@Singleton
+class FirebaseRepository @Inject constructor(
+    private val storageRepository: FirebaseStorageRepository
+) {
+
+    companion object {
+        // Ensure we always connect to the intended Realtime Database URL
+        private const val DATABASE_URL = "https://xamu-wil-default-rtdb.firebaseio.com/"
+        private const val TAG = "FirebaseRepository"
+    }
+
+    // Use the explicit DB instance for all operations (avoids ambiguity when multiple DBs are present)
+    private val database: FirebaseDatabase = FirebaseDatabase.getInstance(DATABASE_URL)
+    private val auth = FirebaseAuth.getInstance()
+
+    // Client Operations
+    fun getClientsFlow(): Flow<List<Client>> = callbackFlow {
+        val ref = database.getReference("ClientInfo")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val clients = mutableListOf<Client>()
+                for (child in snapshot.children) {
+                    child.getValue(Client::class.java)?.let { clients.add(it) }
+                }
+                trySend(clients).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    suspend fun addClient(client: Client): Result<String> {
+        return try {
+            Log.d("FirebaseRepository", "Attempting to add client: ${client.companyName}")
+            val ref = database.getReference("ClientInfo").push()
+            ref.setValue(client).await()
+            Log.d("FirebaseRepository", "Client added successfully with key: ${ref.key}")
+            Result.success(ref.key ?: "")
+        } catch (e: Exception) {
+            Log.e("FirebaseRepository", "Failed to add client: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateClient(client: Client): Result<Unit> {
+        return try {
+            val query = database.getReference("ClientInfo").orderByChild("companyName").equalTo(client.companyName)
+            val snapshot = query.get().await()
+            for (child in snapshot.children) {
+                child.ref.setValue(client).await()
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteClient(client: Client): Result<Unit> {
+        return try {
+            val query = database.getReference("ClientInfo").orderByChild("companyName").equalTo(client.companyName)
+            val snapshot = query.get().await()
+            for (child in snapshot.children) {
+                child.ref.removeValue().await()
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Project Operations
+    fun getProjectsFlow(userEmail: String): Flow<List<Project>> = callbackFlow {
+        val ref = database.getReference("ProjectsInfo")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val projects = mutableListOf<Project>()
+                for (child in snapshot.children) {
+                    child.getValue(Project::class.java)?.let { projects.add(it) }
+                }
+                trySend(projects).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        // filter by userEmail using query
+        val query = ref.orderByChild("appUserUsername").equalTo(userEmail)
+        query.addValueEventListener(listener)
+        awaitClose { query.removeEventListener(listener) }
+    }
+
+    suspend fun addProject(project: Project): Result<String> {
+        return try {
+            val ref = database.getReference("ProjectsInfo").push()
+            ref.setValue(project).await()
+            Result.success(ref.key ?: "")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Note Operations
+    suspend fun addNote(companyName: String, projectName: String, note: Note): Result<String> {
+        return try {
+            val ref = database.getReference("ProjectData/$companyName/$projectName/Notes").push()
+            ref.setValue(note).await()
+            Result.success(ref.key ?: "")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getNotesFlow(companyName: String, projectName: String): Flow<List<Note>> = callbackFlow {
+        val ref = database.getReference("ProjectData/$companyName/$projectName/Notes")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val notes = mutableListOf<Note>()
+                for (child in snapshot.children) {
+                    child.getValue(Note::class.java)?.let { notes.add(it) }
+                }
+                trySend(notes).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    // Route Operations
+    suspend fun saveRoute(companyName: String, projectName: String, route: Route): Result<String> {
+        return try {
+            val ref = database.getReference("ProjectData/$companyName/$projectName/Routes/${route.routeId}")
+            ref.setValue(route).await()
+            Result.success(route.routeId)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getRoutesFlow(companyName: String, projectName: String): Flow<List<Route>> = callbackFlow {
+        val ref = database.getReference("ProjectData/$companyName/$projectName/Routes")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val routes = mutableListOf<Route>()
+                for (child in snapshot.children) {
+                    child.getValue(Route::class.java)?.let { routes.add(it) }
+                }
+                trySend(routes).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    // Project Data Operations
+    fun getProjectDataFlow(companyName: String, projectName: String): Flow<ProjectData> = callbackFlow {
+        val ref = database.getReference("ProjectData/$companyName/$projectName")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val notes = mutableListOf<Note>()
+                val routes = mutableListOf<Route>()
+                val photos = mutableListOf<FieldPhoto>()
+                val weatherData = mutableListOf<WeatherSoilData>()
+                val biophysicalData = mutableListOf<BiophysicalAttributes>()
+
+                snapshot.child("Notes").children.forEach { child ->
+                    child.getValue(Note::class.java)?.let { notes.add(it) }
+                }
+                snapshot.child("Routes").children.forEach { child ->
+                    child.getValue(Route::class.java)?.let { routes.add(it) }
+                }
+                snapshot.child("Photos").children.forEach { child ->
+                    child.getValue(FieldPhoto::class.java)?.let { photos.add(it) }
+                }
+                snapshot.child("WeatherSoil").children.forEach { child ->
+                    child.getValue(WeatherSoilData::class.java)?.let { weatherData.add(it) }
+                }
+                snapshot.child("Biophysical").children.forEach { child ->
+                    try {
+                        val entry = child.getValue(BiophysicalAttributes::class.java)
+                        if (entry != null) {
+                            entry.id = child.key ?: ""
+                            biophysicalData.add(entry)
+                        }
+                    } catch (e: DatabaseException) {
+                        Log.w("FirebaseRepository", "Failed to parse BiophysicalAttributes, skipping entry: ${child.key}", e)
+                    }
+                }
+
+                val impacts = snapshot.child("Impacts").getValue(PhaseImpacts::class.java)
+
+                val projectData = ProjectData(
+                    biophysical = biophysicalData,
+                    impacts = impacts,
+                    notes = notes,
+                    routes = routes,
+                    photos = photos,
+                    weatherData = weatherData,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                trySend(projectData).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    // Biophysical Data Operations
+    suspend fun addBiophysicalData(
+        companyName: String,
+        projectName: String,
+        data: BiophysicalAttributes
+    ): Result<Unit> {
+        return try {
+            database.getReference("ProjectData/$companyName/$projectName/Biophysical").push()
+                .setValue(data).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateBiophysicalData(
+        companyName: String,
+        projectName: String,
+        data: BiophysicalAttributes
+    ): Result<Unit> {
+        return try {
+            if (data.id.isBlank()) {
+                return Result.failure(IllegalArgumentException("Biophysical data ID for update is missing."))
+            }
+            val ref = database.getReference("ProjectData/$companyName/$projectName/Biophysical/${data.id}")
+            ref.setValue(data).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Impact Data Operations
+    suspend fun saveImpactData(
+        companyName: String,
+        projectName: String,
+        data: PhaseImpacts
+    ): Result<Unit> {
+        return try {
+            database.getReference("ProjectData/$companyName/$projectName/Impacts")
+                .setValue(data).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Weather & Soil Operations
+    suspend fun addWeatherSoilData(
+        companyName: String,
+        projectName: String,
+        data: WeatherSoilData
+    ): Result<String> {
+        return try {
+            val ref = database.getReference("ProjectData/$companyName/$projectName/WeatherSoil").push()
+            ref.setValue(data).await()
+            Result.success(ref.key ?: "")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // User Profile Operations
+    suspend fun createOrUpdateUser(uid: String, user: AppUser): Result<Unit> {
+        return try {
+            database.getReference("AppUsers/$uid").setValue(user).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getUserProfile(uid: String): Flow<AppUser?> = callbackFlow {
+        val ref = database.getReference("AppUsers/$uid")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val user = snapshot.getValue(AppUser::class.java)
+                trySend(user).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    // User Settings Operations
+    suspend fun saveUserSettings(settings: UserSettings): Result<Unit> {
+        return try {
+            val uid = auth.currentUser?.uid ?: return Result.failure(Exception("User not logged in"))
+            database.getReference("UserSettings/$uid/AppSettings").setValue(settings).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getUserSettingsFlow(): Flow<UserSettings?> = callbackFlow {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            trySend(null).isSuccess
+            close()
+            return@callbackFlow
+        }
+
+        val ref = database.getReference("UserSettings/$uid/AppSettings")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val settings = snapshot.getValue(UserSettings::class.java)
+                trySend(settings).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    // Photo upload: upload to Firebase Storage (via FirebaseStorageRepository) and persist metadata to Realtime DB
+    suspend fun uploadPhoto(
+        companyName: String,
+        projectName: String,
+        photoUri: Uri,
+        caption: String,
+        location: String
+    ): Result<FieldPhoto> {
+        return try {
+            Log.d(TAG, "uploadPhoto: starting for $companyName / $projectName")
+
+            // Ensure authenticated
+            val uid = auth.currentUser?.uid ?: return Result.failure(Exception("User not authenticated"))
+
+            val photoId = System.currentTimeMillis().toString()
+
+            // Upload file to Firebase Storage (returns public URL)
+            val uploadResult = storageRepository.uploadPhoto(photoUri, companyName, projectName, photoId)
+            if (uploadResult.isFailure) {
+                return Result.failure(uploadResult.exceptionOrNull()!!)
+            }
+
+            val publicUrl = uploadResult.getOrNull() ?: return Result.failure(Exception("Upload returned empty URL"))
+
+            // Build FieldPhoto object
+            val fieldPhoto = FieldPhoto(
+                photoId = photoId,
+                url = publicUrl,
+                thumbnailUrl = null,
+                caption = caption,
+                location = location,
+                timestamp = System.currentTimeMillis(),
+                userId = uid,
+                uploadStatus = "completed"
+            )
+
+            // Persist metadata under ProjectData/{companyName}/{projectName}/Photos/{photoId}
+            val ref = database.getReference("ProjectData/$companyName/$projectName/Photos/$photoId")
+            ref.setValue(fieldPhoto).await()
+
+            Log.d(TAG, "uploadPhoto: persisted metadata for $photoId")
+            Result.success(fieldPhoto)
+        } catch (e: Exception) {
+            Log.e(TAG, "uploadPhoto failed: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+}

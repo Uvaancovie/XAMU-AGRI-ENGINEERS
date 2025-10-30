@@ -1,33 +1,36 @@
-# 🌿 Xamu Wetlands
+# Xamu Wetlands Field App: Official Documentation
 
-Android mobile application for **field data collection and synchronization** in wetland research and restoration projects.
+This folder contains the complete software documentation for the Xamu Wetlands mobile application. The documentation is structured to be easily navigable on GitHub.
 
----
+## Table of Contents
 
-## 🧱 Stack
-- Kotlin + MVVM + Hilt + Coroutines
-- Firebase RTDB + Storage
-- Google Sign-In + Biometrics
-- Mapbox SDK (Satellite + Tracking)
-- Retrofit + Custom Weather API
-- SharedPreferences / Room + WorkManager
+### 1. Project Management & Process
 
----
+- [Work Agreement](work_agreement.md)
+- [Definition of Ready & Done](definitions.md)
+- [High-Level Product Roadmap](roadmap.md)
 
-## 🧩 Core Modules
-| Module | Key Activities |
-|:--|:--|
-| Auth & Onboarding | Google Sign-In / RegisterActivity / Session persist |
-| Clients & Projects | Client + Project lists / Create Project |
-| Field Data | Biophysical + Impact forms / Sync RTDB |
-| Maps & Routes | Mapbox map / Notes / Camera / Routes |
-| Weather | Weather snapshot via API |
-| Settings | Language + Theme + Persistence |
+### 2. Requirements & Analysis
 
----
+- [User Roles & Stories](user_stories.md)
+- [Functional & Non-Functional Requirements](requirements.md)
+- [Domain-Driven Design (DDD) Artifacts](ddd_artifacts.md)
 
-## 🚀 Quick Start
-```bash
-git clone https://github.com/way2flydigital/xamu-wetlands.git
-cd xamu-wetlands
-# Open in Android Studio Giraffe +
+### 3. Design & Architecture
+
+- [System Architecture (C4 Model)](architecture.md)
+- [Cloud Architecture & Decisions](cloud_architecture.md)
+- [Data Schema (ERDs & JSON)](data_schema.md)
+- [UML Diagrams](uml_diagrams.md)
+
+### 4. Implementation & Deployment
+
+- [Deployment Guide](deployment.md)
+- [DevOps & CI/CD Pipeline](devops.md)
+
+### 5. Operations & Governance
+
+- [Security Considerations](security.md)
+- [Running Costs](costs.md)
+- [Change Management Strategy](change_management.md)
+- [Adoption Strategy for Xamu](adoption.md)

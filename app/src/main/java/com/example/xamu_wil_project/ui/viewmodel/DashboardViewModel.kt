@@ -35,41 +35,30 @@ class DashboardViewModel @Inject constructor(
 
     private fun loadDashboardData() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { it.copy(isLoading = true) }
 
             val userEmail = auth.currentUser?.email ?: return@launch
 
-            // Load projects
-            repository.getProjectsFlow(userEmail).collect { projects ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    totalProjects = projects.size,
-                    recentProjects = projects.take(5)
-                )
+            repository.getProjectsFlow(userEmail)
+                .combine(repository.getClientsFlow()) { projects, clients ->
+                    val recentProjects = projects.sortedByDescending { it.createdAt }.take(5)
+                    val notesFlows = recentProjects.map { repository.getNotesFlow(it.companyName ?: "", it.projectName ?: "") }
+                    val routesFlows = recentProjects.map { repository.getRoutesFlow(it.companyName ?: "", it.projectName ?: "") }
 
-                // Load notes and routes for each project
-                var totalNotes = 0
-                var totalRoutes = 0
-                projects.forEach { project ->
-                    repository.getNotesFlow(project.companyName ?: "", project.projectName ?: "").collect { notes ->
-                        totalNotes += notes.size
-                    }
-                    repository.getRoutesFlow(project.companyName ?: "", project.projectName ?: "").collect { routes ->
-                        totalRoutes += routes.size
-                    }
-                }
-                _uiState.value = _uiState.value.copy(
-                    totalNotes = totalNotes,
-                    totalRoutes = totalRoutes
-                )
-            }
-
-            // Load clients count
-            repository.getClientsFlow().collect { clients ->
-                _uiState.value = _uiState.value.copy(
-                    totalClients = clients.size
-                )
-            }
+                    combine(notesFlows) { notes -> notes.sumOf { it.size } }
+                        .combine(combine(routesFlows) { routes -> routes.sumOf { it.size } }) { notesCount, routesCount ->
+                            _uiState.update { currentState ->
+                                currentState.copy(
+                                    totalProjects = projects.size,
+                                    totalClients = clients.size,
+                                    recentProjects = recentProjects,
+                                    totalNotes = notesCount,
+                                    totalRoutes = routesCount,
+                                    isLoading = false
+                                )
+                            }
+                        }.collect()
+                }.launchIn(viewModelScope)
         }
     }
 

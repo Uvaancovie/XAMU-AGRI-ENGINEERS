@@ -1,5 +1,7 @@
 package com.example.xamu_wil_project.data
 
+import com.google.firebase.database.Exclude
+
 data class AppUser(
     val email: String? = "",
     val firstname: String? = "",
@@ -29,6 +31,8 @@ data class Project(
 )
 
 data class BiophysicalAttributes(
+    @get:Exclude var id: String = "", // Exclude from Firebase serialization
+    val timestamp: Long = System.currentTimeMillis(),
     val location: String = "",
     val elevation: String = "",
     val ecoregion: String = "",
@@ -113,7 +117,7 @@ data class FieldPhoto(
 )
 
 data class ProjectData(
-    val biophysical: BiophysicalAttributes? = null,
+    val biophysical: List<BiophysicalAttributes> = emptyList(),
     val impacts: PhaseImpacts? = null,
     val notes: List<Note> = emptyList(),
     val routes: List<Route> = emptyList(),

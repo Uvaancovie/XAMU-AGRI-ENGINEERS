@@ -18,6 +18,7 @@ data class ProjectDetailsUiState(
     val notes: List<Note> = emptyList(),
     val routes: List<Route> = emptyList(),
     val photos: List<FieldPhoto> = emptyList(),
+    val biophysical: List<BiophysicalAttributes> = emptyList(),
     val currentRoute: Route? = null,
     val isTrackingRoute: Boolean = false
 )
@@ -149,9 +150,22 @@ class ProjectDetailsViewModel @Inject constructor(
                         isLoading = false,
                         notes = projectData.notes,
                         routes = projectData.routes,
-                        photos = projectData.photos
+                        photos = projectData.photos,
+                        biophysical = projectData.biophysical
                     )
                 }
+        }
+    }
+
+    fun addBiophysicalData(companyName: String, projectName: String, data: BiophysicalAttributes) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val result = repository.addBiophysicalData(companyName, projectName, data)
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                successMessage = if (result.isSuccess) "Biophysical data saved" else null,
+                errorMessage = result.exceptionOrNull()?.message
+            )
         }
     }
 

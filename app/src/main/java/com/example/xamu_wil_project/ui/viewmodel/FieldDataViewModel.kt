@@ -34,7 +34,7 @@ class FieldDataViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            val result = repository.saveBiophysicalData(companyName, projectName, data)
+            val result = repository.addBiophysicalData(companyName, projectName, data)
 
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
@@ -69,4 +69,3 @@ class FieldDataViewModel @Inject constructor(
         )
     }
 }
-

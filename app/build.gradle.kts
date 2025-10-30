@@ -88,12 +88,16 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Image Loading
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Google Play Services for Location
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Cloudinary
+    implementation("com.cloudinary:cloudinary-android:2.7.1")
 
     // Material Components for XML compatibility
     implementation("com.google.android.material:material:1.11.0")

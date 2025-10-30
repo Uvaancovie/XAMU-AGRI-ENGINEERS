@@ -70,9 +70,9 @@ fun WeatherDialog(
                     uiState.isLoading -> {
                         LoadingWeatherContent()
                     }
-                    uiState.errorMessage != null -> {
+                    uiState.error != null -> {
                         ErrorWeatherContent(
-                            errorMessage = uiState.errorMessage!!,
+                            errorMessage = uiState.error!!,
                             onRetry = { viewModel.fetchWeather(latitude, longitude) }
                         )
                     }

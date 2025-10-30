@@ -26,9 +26,9 @@ import com.example.xamu_wil_project.data.PhaseImpacts
 fun AddDataToProjectScreen(
     companyName: String,
     projectName: String,
-    locationStamp: String = "",
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    locationStamp: String = "",
     viewModel: FieldDataViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -93,7 +93,7 @@ fun AddDataToProjectScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
                         )
                     }

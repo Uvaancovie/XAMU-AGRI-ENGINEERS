@@ -1,9 +1,13 @@
 package com.example.xamu_wil_project.ui.compose.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,10 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.xamu_wil_project.data.Project
 import com.example.xamu_wil_project.ui.compose.components.DashboardCard
 import com.example.xamu_wil_project.ui.viewmodel.AuthViewModel
 import com.example.xamu_wil_project.ui.viewmodel.DashboardViewModel
 import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Dashboard Screen - Main hub for Xamu Wetlands App
@@ -28,6 +35,7 @@ fun DashboardScreen(
     onNavigateToClients: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToWeather: () -> Unit,
+    onNavigateToProject: (String, String) -> Unit,
     onLogout: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
     dashboardViewModel: DashboardViewModel = hiltViewModel()
@@ -63,14 +71,14 @@ fun DashboardScreen(
                     }
                     IconButton(onClick = { showLogoutDialog = true }) {
                         Icon(
-                            imageVector = Icons.Filled.Logout,
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Logout"
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentC,olor = MaterialTheme.colorScheme.onPrimary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
@@ -120,7 +128,7 @@ fun DashboardScreen(
                     StatCard(
                         title = "Field Notes",
                         value = dashboardState.totalNotes.toString(),
-                        icon = Icons.Filled.Note,
+                        icon = Icons.AutoMirrored.Filled.Note,
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
@@ -154,7 +162,7 @@ fun DashboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowForward,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp)
                         )
@@ -223,9 +231,8 @@ fun DashboardScreen(
 
             items(dashboardState.recentProjects) { project ->
                 RecentProjectCard(
-                    projectName = project.projectName ?: "Unnamed Project",
-                    companyName = project.companyName ?: "Unknown Client",
-                    lastUpdated = "Recently updated"
+                    project = project,
+                    onClick = { onNavigateToProject(project.companyName ?: "", project.projectName ?: "") }
                 )
             }
 
@@ -242,7 +249,7 @@ fun DashboardScreen(
             onDismissRequest = { showLogoutDialog = false },
             icon = {
                 Icon(
-                    imageVector = Icons.Filled.Logout,
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
                     contentDescription = null
                 )
             },
@@ -313,12 +320,18 @@ private fun StatCard(
 
 @Composable
 private fun RecentProjectCard(
-    projectName: String,
-    companyName: String,
-    lastUpdated: String
+    project: Project,
+    onClick: () -> Unit
 ) {
+    val formattedDate = remember(project.createdAt) {
+        val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        sdf.format(Date(project.createdAt))
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
@@ -335,17 +348,17 @@ private fun RecentProjectCard(
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = projectName,
+                    text = project.projectName ?: "Unnamed Project",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = companyName,
+                    text = project.companyName ?: "Unknown Client",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = lastUpdated,
+                    text = "Created on: $formattedDate",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

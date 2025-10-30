@@ -2,7 +2,7 @@ package com.example.xamu_wil_project.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.xamu_wil_project.data.WeatherApi
+import com.example.xamu_wil_project.data.WeatherResponse
 import com.example.xamu_wil_project.data.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 data class WeatherUiState(
     val isLoading: Boolean = false,
-    val weatherData: WeatherApi? = null,
+    val weatherData: WeatherResponse? = null,
     val error: String? = null
 )
 
@@ -25,15 +25,26 @@ class WeatherViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(WeatherUiState())
     val uiState: StateFlow<WeatherUiState> = _uiState.asStateFlow()
 
-    fun getWeatherData(latitude: Double, longitude: Double) {
+    fun fetchWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val weatherData = weatherRepository.getWeatherData(latitude, longitude)
-                _uiState.value = _uiState.value.copy(isLoading = false, weatherData = weatherData)
+                val result = weatherRepository.getCurrentWeather(latitude, longitude)
+                result.fold(
+                    onSuccess = { weatherData ->
+                        _uiState.value = _uiState.value.copy(isLoading = false, weatherData = weatherData)
+                    },
+                    onFailure = { exception ->
+                        _uiState.value = _uiState.value.copy(isLoading = false, error = exception.message)
+                    }
+                )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
             }
         }
+    }
+
+    fun clearWeatherData() {
+        _uiState.value = WeatherUiState()
     }
 }

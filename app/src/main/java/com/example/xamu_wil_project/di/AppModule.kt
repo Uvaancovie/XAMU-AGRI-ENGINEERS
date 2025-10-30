@@ -3,6 +3,7 @@ package com.example.xamu_wil_project.di
 import com.example.xamu_wil_project.data.WeatherApiService
 import com.example.xamu_wil_project.data.repository.FirebaseRepository
 import com.example.xamu_wil_project.data.repository.WeatherRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 
 /**
  * Hilt Dependency Injection Module for Xamu Wetlands App
- * Includes Firebase and Weather API services
+ * Includes Firebase, Supabase Storage, and Weather API services
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -23,9 +24,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseRepository(): FirebaseRepository {
-        return FirebaseRepository()
-    }
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
     // Network Dependencies
     @Provides

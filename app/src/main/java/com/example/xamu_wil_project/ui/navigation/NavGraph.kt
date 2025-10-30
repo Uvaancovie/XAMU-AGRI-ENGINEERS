@@ -1,14 +1,20 @@
 package com.example.xamu_wil_project.ui.navigation
 
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.xamu_wil_project.MainActivity
+import com.example.xamu_wil_project.cloudinary.ProjectImagesScreen
 import com.example.xamu_wil_project.data.Client
 import com.example.xamu_wil_project.ui.compose.screens.*
+import dagger.hilt.android.EntryPointAccessors
 
 /**
  * Navigation Graph for Xamu Wetlands App
@@ -41,6 +47,13 @@ sealed class Screen(val route: String) {
     object ViewData : Screen("view_data/{companyName}/{projectName}") {
         fun createRoute(companyName: String, projectName: String) =
             "view_data/$companyName/$projectName"
+    }
+    object EditBiophysicalData : Screen("edit_biophysical_data/{companyName}/{projectName}/{entryId}") {
+        fun createRoute(companyName: String, projectName: String, entryId: String) =
+            "edit_biophysical_data/$companyName/$projectName/$entryId"
+    }
+    object ProjectImages : Screen("project_images/{projectId}") {
+        fun createRoute(projectId: String) = "project_images/$projectId"
     }
     object Settings : Screen("settings")
     object Weather : Screen("weather")
@@ -90,6 +103,11 @@ fun XamuNavGraph(
                 onNavigateToClients = { navController.navigate(Screen.ClientList.route) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                 onNavigateToWeather = { navController.navigate(Screen.Weather.route) },
+                onNavigateToProject = { companyName, projectName ->
+                    navController.navigate(
+                        Screen.ProjectDetails.createRoute(companyName, projectName)
+                    )
+                },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -186,6 +204,14 @@ fun XamuNavGraph(
                     navController.navigate(
                         Screen.AddFieldData.createRoute(companyName, projectName)
                     )
+                },
+                onNavigateToViewData = {
+                    navController.navigate(
+                        Screen.ViewData.createRoute(companyName, projectName)
+                    )
+                },
+                onNavigateToProjectImages = {
+                    navController.navigate(Screen.ProjectImages.createRoute(projectName))
                 }
             )
         }
@@ -220,6 +246,43 @@ fun XamuNavGraph(
             ViewDataScreen(
                 companyName = companyName,
                 projectName = projectName,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEditEntry = { entryId ->
+                    navController.navigate(
+                        Screen.EditBiophysicalData.createRoute(companyName, projectName, entryId)
+                    )
+                }
+            )
+        }
+
+        // Edit Biophysical Data
+        composable(
+            route = Screen.EditBiophysicalData.route,
+            arguments = listOf(
+                navArgument("companyName") { type = NavType.StringType },
+                navArgument("projectName") { type = NavType.StringType },
+                navArgument("entryId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val companyName = backStackEntry.arguments?.getString("companyName") ?: ""
+            val projectName = backStackEntry.arguments?.getString("projectName") ?: ""
+            val entryId = backStackEntry.arguments?.getString("entryId") ?: ""
+            EditBiophysicalDataScreen(
+                companyName = companyName,
+                projectName = projectName,
+                entryId = entryId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Project Images
+        composable(
+            route = Screen.ProjectImages.route,
+            arguments = listOf(navArgument("projectId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val projectId = backStackEntry.arguments?.getString("projectId") ?: ""
+            ProjectImagesScreen(
+                projectId = projectId,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
